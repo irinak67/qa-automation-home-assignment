@@ -1,0 +1,21 @@
+node_modules/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
+
+# Playwright
+blob-report/
+playwright/.cache/
+
+# Build and coverage
+dist/
+coverage/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
