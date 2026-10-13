@@ -65,7 +65,7 @@ test('eight repeated digits fail password strength validation and a stronger val
   await expect(page.getByText('Strength: Strong', { exact: true })).toBeVisible();
 });
 
-test('nickname requires at least two characters and accepts a letter followed by a digit', async ({ page }) => {
+test('nickname enforces its minimum and maximum length boundaries', async ({ page }) => {
   const nickname = page.getByLabel('Nickname', { exact: true });
   const error = page.getByText('Must be at least 2 characters.', { exact: true });
 
@@ -78,6 +78,12 @@ test('nickname requires at least two characters and accepts a letter followed by
   await expect(error).toBeHidden();
   await expect(page.getByText('Must start with a letter.', { exact: true })).toBeHidden();
   await expect(page.getByText("Can't contain special characters or spaces.", { exact: true })).toBeHidden();
+
+  const maximumLengthError = page.getByText('Must be shorter than 11 characters.', { exact: true });
+  await nickname.fill('Qa123456789');
+  await expect(maximumLengthError).toBeVisible();
+  await nickname.fill('Qa12345678');
+  await expect(maximumLengthError).toBeHidden();
 });
 
 test('nickname rejects a numeric first character, special characters, and spaces', async ({ page }) => {
