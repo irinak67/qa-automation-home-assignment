@@ -28,7 +28,7 @@ credentials. IMAP connection and delivery timeouts are defined in the same
 module. Shared application settings and UI/API/scenario waiting budgets live in
 `config/test.config.ts`; Playwright runner settings remain in `playwright.config.ts`.
 
-Each run creates three real canary accounts using aliases delivered to this mailbox.
+A complete successful email-suite run creates three real canary accounts using aliases delivered to this mailbox.
 Account cleanup is not implemented.
 
 Keep credentials in the local `.env`. Do not commit it or generated reports and traces.
