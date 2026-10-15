@@ -1,11 +1,11 @@
+import { application } from './config/test.config';
 import { defineConfig, devices } from '@playwright/test';
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
 
 config({ path: resolve(__dirname, '.env'), quiet: true });
 
-// VS Code and the UI runner can stay open together. Keep their trace files
-// separate so starting one runner does not clean up the other's artifacts.
+// Separate outputs prevent concurrent runners from deleting each other's traces.
 const runMode = process.argv.includes('test-server')
   ? 'vscode'
   : process.argv.some(argument => argument === '--ui' || argument.startsWith('--ui='))
@@ -14,17 +14,16 @@ const runMode = process.argv.includes('test-server')
 
 export default defineConfig({
   testDir: './tests',
-  testIgnore: '**/unit/**',
   outputDir: `test-results/${runMode}`,
   fullyParallel: false,
-  // A single worker avoids competing browser startups and mailbox traffic.
+  // Limit concurrent mailbox connections and email traffic.
   workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${runMode}` }]],
   use: {
-    testIdAttribute: 'data-qa',
-    baseURL: 'https://app.canary.talkspace.com',
+    testIdAttribute: application.testIdAttribute,
+    baseURL: application.baseURL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

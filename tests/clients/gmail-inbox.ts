@@ -24,9 +24,6 @@ export class GmailInbox {
       logger: false,
       connectionTimeout: config.connectionTimeoutMs,
       greetingTimeout: config.greetingTimeoutMs,
-      // UI registration and verification can take longer than 15 seconds between
-      // mail operations. Keep automatic IDLE enabled and use ImapFlow's default
-      // five-minute inactivity window, separate from initial connection timeouts.
       socketTimeout: config.socketTimeoutMs,
     });
     this.client.on('error', () => { this.connectionFailed = true; });
@@ -105,7 +102,6 @@ export class GmailInbox {
       } finally {
         lock.release();
       }
-      // Bounded delivery polling, not an arbitrary UI sleep.
       await delay(Math.min(this.config.pollIntervalMs, Math.max(0, deadline - Date.now())));
     }
     throw new Error(`No fresh ${kind} email arrived within ${this.config.deliveryTimeoutMs / 1_000} seconds in GMAIL_MAILBOX. Check the recipient, folder, spam, and application email delivery.`);

@@ -27,15 +27,24 @@ npm run report
 ## Code organization
 
 - `config/`: environment validation and mailbox settings.
+- `config/test.config.ts`: shared application URLs, test-id attribute, named UI/API
+  waiting budgets and email scenario budgets.
+- `config/mail.config.ts`: IMAP defaults and timeouts, plus lazy credential validation.
 - `constants/`: named application API paths.
 - `tests/fixtures/`: Playwright setup and teardown; creates the mailbox client per test.
 - `tests/clients/`: IMAP connection, mailbox checkpoints, and delivery polling.
-- `tests/utils/`: email parsing and signup data generation; no Playwright or environment access.
+- `tests/utils/`: email parsing, signup data generation, and the shared dropdown helper.
 - `tests/*.spec.ts`: scenarios, UI actions, and assertions.
 
 The email fixture supplies configuration to the client. The client uses the email
 parser; utilities never import clients or fixtures. Email content types live with
 the parser, while the IMAP checkpoint type lives with the client.
+
+Waiting budgets are named by purpose rather than size: an API response, a UI
+transition, and an email delivery have independent limits even when their values
+coincide.
+Boundary values and expected validation messages stay in the scenarios so the
+behavior under test remains visible. Changing these budgets does not fix CORS failures.
 
 ## Scope and review status
 

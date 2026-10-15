@@ -25,8 +25,7 @@ export async function parseMatchingEmail(
 }
 
 export function verificationCode(message: ReceivedEmail): string {
-  // The observed template places its six-digit code on a separate line.
-  // Avoid picking arbitrary numbers from a footer or a tracking URL.
+  // The email template puts the OTP on its own line; ignore numbers elsewhere.
   const codes = new Set([...message.text.matchAll(/^\s*(\d{6})\s*$/gm)].map(match => match[1]));
   if (codes.size !== 1) throw new Error('Expected one unambiguous six-digit verification code in the fresh email.');
   return [...codes][0];

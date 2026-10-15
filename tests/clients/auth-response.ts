@@ -1,9 +1,8 @@
+import { timeouts } from '../../config/test.config';
 import type { Page, Request, Response } from '@playwright/test';
 import { AuthEndpoint } from '../../constants/auth-endpoints';
 
-// Register before the triggering action. The caller starts its timeout when
-// the preceding step completes, so an early response is retained without
-// consuming the next step's budget.
+// Register before the action to retain early responses; the timeout starts in wait().
 export function observeAuthResponse(page: Page, endpoint: AuthEndpoint) {
   let result: { response: Response } | { error: Error } | undefined;
   let wake: (() => void) | undefined;
@@ -23,7 +22,7 @@ export function observeAuthResponse(page: Page, endpoint: AuthEndpoint) {
   page.on('response', onResponse);
   page.on('requestfailed', onFailure);
   return {
-    async wait(timeoutMs = 20_000): Promise<Response> {
+    async wait(timeoutMs: number = timeouts.authResponseMs): Promise<Response> {
       let timer: ReturnType<typeof setTimeout> | undefined;
       try {
         if (!result) await new Promise<void>((resolve, reject) => {

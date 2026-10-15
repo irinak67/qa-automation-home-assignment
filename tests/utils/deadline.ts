@@ -1,5 +1,4 @@
-// Closing the transport on expiry is the caller's responsibility: racing a
-// promise alone does not cancel a pending network operation.
+// onTimeout must cancel the operation; Promise.race alone does not stop it.
 export async function withinDeadline<T>(
   operation: () => Promise<T>, timeoutMs: number, onTimeout: () => void, message: string,
 ): Promise<T> {

@@ -1,15 +1,18 @@
+import { application, timeouts } from '../config/test.config';
 import { test, expect, type Page } from '@playwright/test';
-import { selectSignupOption } from './pages/signup-form';
+import { selectSignupOption } from './utils/signup-form';
+
+const validPassword = '123456789asdfqe8';
 
 async function fillValidDetailsExceptNickname(page: Page) {
   await page.getByTestId('emailInput').fill('qa.signup@example.com');
-  await page.getByTestId('createAccountPasswordInput').fill('123456789asdfqe8');
+  await page.getByTestId('createAccountPasswordInput').fill(validPassword);
   await selectSignupOption(page, 'state', 'Alabama');
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/signup/autoswitchpt', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByRole('heading', { name: 'Create your account', exact: true })).toBeVisible({ timeout: 20_000 });
+  await page.goto(application.signupPath, { waitUntil: 'domcontentloaded' });
+  await expect(page.getByRole('heading', { name: 'Create your account', exact: true })).toBeVisible({ timeout: timeouts.signupReadyMs });
   await selectSignupOption(page, 'country', 'United States');
 });
 
@@ -26,14 +29,14 @@ test('submitting an empty registration form displays required-field errors', asy
 test('email without @ blocks submission when the other fields are valid', async ({ page }) => {
   const email = page.getByTestId('emailInput');
   await email.fill('qa-example.com');
-  await page.getByTestId('createAccountPasswordInput').fill('123456789asdfqe8');
+  await page.getByTestId('createAccountPasswordInput').fill(validPassword);
   await page.getByTestId('nicknameInput').fill('QaTester');
   await selectSignupOption(page, 'state', 'Alabama');
 
   const registrationRequests: string[] = [];
   page.on('request', request => {
     const url = new URL(request.url());
-    if (url.hostname === 'clientapi.canary.talkspace.com' && request.method() === 'POST') {
+    if (url.hostname === application.apiHostname && request.method() === 'POST') {
       registrationRequests.push(url.pathname);
     }
   });
@@ -64,7 +67,6 @@ test('password minimum-length error appears before submission and clears at eigh
   await expect(error).toBeVisible();
   await password.fill('m62i67v8');
   await expect(error).toBeHidden();
-  // Clearing the length error does not prove that the strength requirement is met.
 });
 
 test('eight repeated digits fail password strength validation and a stronger value clears the error', async ({ page }) => {
@@ -75,7 +77,7 @@ test('eight repeated digits fail password strength validation and a stronger val
   await expect(error).toBeVisible();
   await expect(page.getByText('Strength: Weak', { exact: true })).toBeVisible();
 
-  await password.fill('123456789asdfqe8');
+  await password.fill(validPassword);
   await expect(error).toBeHidden();
   await expect(page.getByText('Strength: Strong', { exact: true })).toBeVisible();
 });
@@ -126,8 +128,7 @@ test('nickname rejects a numeric first character, special characters, and spaces
 test('state is displayed for United States and hidden for Israel', async ({ page }) => {
   const state = page.getByTestId('stateDropdown');
 
-  // The custom select's painted value has a zero-height text wrapper.
-  // Assert the submitted country value and the visible dependent field instead.
+  // The select's text wrapper has zero height; check its underlying input value.
   await expect(page.locator('input[name="country"]')).toHaveValue('US');
   await expect(state).toBeVisible();
   await selectSignupOption(page, 'state', 'Alabama');

@@ -10,7 +10,6 @@
     "test:headed": "playwright test --headed",
     "report": "playwright show-report playwright-report/cli",
     "typecheck": "tsc --noEmit",
-    "test:unit": "playwright test --config=playwright.unit.config.ts",
     "report:ui": "playwright show-report playwright-report/ui",
     "report:vscode": "playwright show-report playwright-report/vscode"
   },

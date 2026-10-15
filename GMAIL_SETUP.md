@@ -25,7 +25,8 @@ Run the email tests with `npm run test:email`. Missing credentials fail the test
 `config/mail.config.ts` reads and validates these values when an email test
 requests its mailbox fixture. Registration-only tests do not require Gmail
 credentials. IMAP connection and delivery timeouts are defined in the same
-module; Playwright runner settings remain in `playwright.config.ts`.
+module. Shared application settings and UI/API/scenario waiting budgets live in
+`config/test.config.ts`; Playwright runner settings remain in `playwright.config.ts`.
 
 Each run creates three real canary accounts using aliases delivered to this mailbox.
 Account cleanup is not implemented.
