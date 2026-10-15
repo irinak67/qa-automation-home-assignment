@@ -84,10 +84,25 @@ async function registerAndReceiveCode(page: Page, inbox: GmailInbox, identity: R
   return verificationCode(message);
 }
 
-emailTest('smoke: a new account verifies its email using the delivered code', async ({ page, inbox, mailConfig }) => {
+emailTest('a new account verifies its email using the resent code', async ({ page, inbox, mailConfig }) => {
+  // This scenario waits for two deliveries, each with its own bounded mail timeout.
+  emailTest.setTimeout(300_000);
   const identity = newSignupIdentity(mailConfig.address);
-  const code = await registerAndReceiveCode(page, inbox, identity);
-  await verifyDeliveredCode(page, code);
+  await registerAndReceiveCode(page, inbox, identity);
+
+  // Take a new boundary after receiving the first email so it cannot satisfy Resend.
+  const checkpoint = await inbox.checkpoint();
+  const resend = observeAuthResponse(page, AuthEndpoint.ResendEmailCode);
+  try {
+    await page.getByRole('button', { name: 'Resend code', exact: true }).click();
+    const response = await resend.wait();
+    expect(response.status(), 'The application must accept the resend request').toBe(200);
+  } finally {
+    resend.dispose();
+  }
+  await expectCodeScreen(page, identity.email);
+  const message = await inbox.waitForEmail(identity.email, checkpoint, 'verification');
+  await verifyDeliveredCode(page, verificationCode(message));
 });
 
 emailTest('an incorrect code is rejected and the correct delivered code allows recovery', async ({ page, inbox, mailConfig }) => {
