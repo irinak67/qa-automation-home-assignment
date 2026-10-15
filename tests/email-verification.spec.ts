@@ -34,9 +34,15 @@ async function enterCode(page: Page, code: string) {
   const inputs = codeInputs(page);
   await expect(inputs).toHaveCount(6);
   for (let i = 0; i < 6; i++) await inputs.nth(i).fill('');
-  await inputs.first().focus();
-  // Sequential keyboard events reproduce the working manual path, rather than paste.
-  await page.keyboard.type(code);
+  // Fail here, not on an OTP timeout, if the app is still resetting the form.
+  for (let i = 0; i < 6; i++) await expect(inputs.nth(i)).toHaveValue('');
+  for (let i = 0; i < 6; i++) {
+    const input = inputs.nth(i);
+    await input.focus();
+    await page.keyboard.press(code[i]);
+    // The sixth digit submits the code and the fields may disappear.
+    if (i < 5) await expect(input).toHaveValue(code[i]);
+  }
 }
 
 async function submitCode(page: Page, code: string) {
