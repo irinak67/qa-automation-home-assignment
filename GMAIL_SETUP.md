@@ -22,6 +22,11 @@ from your Gmail sign-in password. `GMAIL_MAILBOX` is optional and defaults to `I
 
 Run the email tests with `npm run test:email`. Missing credentials fail the tests.
 
+`config/mail.config.ts` reads and validates these values when an email test
+requests its mailbox fixture. Registration-only tests do not require Gmail
+credentials. IMAP connection and delivery timeouts are defined in the same
+module; Playwright runner settings remain in `playwright.config.ts`.
+
 Each run creates three real canary accounts using aliases delivered to this mailbox.
 Account cleanup is not implemented.
 
