@@ -5,11 +5,14 @@
   "scripts": {
     "test": "playwright test",
     "test:registration": "playwright test tests/signup.spec.ts",
-    "test:email": "playwright test tests/email-verification.spec.ts --workers=1",
+    "test:email": "playwright test tests/email-verification.spec.ts",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
-    "report": "playwright show-report",
-    "typecheck": "tsc --noEmit"
+    "report": "playwright show-report playwright-report/cli",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "playwright test --config=playwright.unit.config.ts",
+    "report:ui": "playwright show-report playwright-report/ui",
+    "report:vscode": "playwright show-report playwright-report/vscode"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",
@@ -18,6 +21,11 @@
     "dotenv": "^18.0.7",
     "imapflow": "^2.4.0",
     "mailparser": "^3.9.38",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "htmlparser2": "^10.1.0",
+    "domutils": "^3.2.2"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
